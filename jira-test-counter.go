@@ -9,8 +9,9 @@ import (
 
 const ServerPort = "80";
 
-func requestHandler(writer http.ResponseWriter, req *http.Request) {
-    fmt.Fprintf(writer, "Hi there: %s", req.URL.Path[1:])
+func requestHandler(w http.ResponseWriter, r *http.Request) {
+    fmt.Println("Request recieved: %s", r.Body);
+    fmt.Fprintf(w, "Hi there: %s", r.URL.Path[1:])
 }
 
 func main() {
