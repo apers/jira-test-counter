@@ -50,9 +50,9 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 
 	event := convertToJson(buf)
 
-	if event.ChangeLog.hasStatusChange() {
+	if event.ChangeLog.hasStatusChange() && event.Issue.isFlagged() {
 		from, to := event.ChangeLog.getStausChange()
-
+		fmt.Println(from, to)
 		if from == CodeReviewCol && to == TestCol {
 			fmt.Println("CodeReview")
 			fmt.Println("PF: ", event.Issue.Key)
