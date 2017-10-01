@@ -13,36 +13,15 @@ import (
 
 const ServerPort = "80"
 
+const DevelopmentCol = "In Progress"
+const CodeReviewCol = "Code Review"
+const TestCol = "Test"
+const DoneCol = "Done"
+
 func check(e error) {
 	if e != nil {
 		log.Fatal(e)
 	}
-}
-
-type JiraEvent struct {
-	User  User  `json:"user" `
-	Issue Issue `json:"issue"`
-}
-
-type User struct {
-	Name  string `json:"name"`
-	Email string `json:"emailAddress"`
-}
-
-type Issue struct {
-	Fields Fields `json:"fields"`
-}
-
-type Fields struct {
-	Flagged []CustomField `json:"customfield_10200"`
-}
-
-type CustomField struct {
-	Value string `json:"value"`
-}
-
-func (issue Issue) isFlagged() bool {
-	return issue.Fields.Flagged[0].Value == "Impediment"
 }
 
 func readFile(filename string) *bytes.Buffer {
@@ -54,26 +33,43 @@ func readFile(filename string) *bytes.Buffer {
 
 func readReader(reader io.Reader) *bytes.Buffer {
 	buf := new(bytes.Buffer)
-	count, err := buf.ReadFrom(reader)
-	if count == 0 {
-	}
+	_, err := buf.ReadFrom(reader)
 	check(err)
 	return buf
 }
 
 func convertToJson(rawJson *bytes.Buffer) JiraEvent {
 	var event JiraEvent
-	fmt.Println(rawJson)
 	err := json.Unmarshal(rawJson.Bytes(), &event)
-	fmt.Println(event.User.Name)
-	fmt.Println("Issue is flagged:", event.Issue.isFlagged())
 	check(err)
 	return event
 }
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
-	convertToJson(buf)
+
+	event := convertToJson(buf)
+
+	if event.ChangeLog.hasStatusChange() {
+		from, to := event.ChangeLog.getStausChange()
+
+		if from == CodeReviewCol && to == TestCol {
+			fmt.Println("CodeReview")
+			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("Flagged: ", event.Issue.isFlagged())
+			fmt.Println("User: ", event.User.Name)
+		}
+
+		if from == TestCol && to == DoneCol {
+			fmt.Println("Test")
+			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("Flagged: ", event.Issue.isFlagged())
+			fmt.Println("User: ", event.User.Name)
+		}
+
+	} else {
+		fmt.Println("Non-status event..", time.Now())
+	}
 }
 
 func main() {
