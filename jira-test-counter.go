@@ -75,8 +75,10 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	fmt.Println(time.Now())
 	fmt.Println("Staring server..")
+	db := dbConnect()
+	db.cleanTables()
 	//buf := readFile("body.json")
 	//convertToJson(buf)
-	http.HandleFunc("/webhook", requestHandler)
-	log.Fatal(http.ListenAndServe(":"+ServerPort, nil))
+	//http.HandleFunc("/webhook", requestHandler)
+	//log.Fatal(http.ListenAndServe(":"+ServerPort, nil))
 }
