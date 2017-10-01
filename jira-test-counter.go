@@ -19,15 +19,30 @@ func check(e error) {
 	}
 }
 
+type JiraEvent struct {
+	User  User  `json:"user" `
+	Issue Issue `json:"issue"`
+}
+
 type User struct {
 	Name  string `json:"name"`
 	Email string `json:"emailAddress"`
 }
+
 type Issue struct {
+	Fields Fields `json:"fields"`
 }
 
-type JiraEvent struct {
-	User User `json:"user" `
+type Fields struct {
+	Flagged []CustomField `json:"customfield_10200"`
+}
+
+type CustomField struct {
+	Value string `json:"value"`
+}
+
+func (issue Issue) isFlagged() bool {
+	return issue.Fields.Flagged[0].Value == "Impediment"
 }
 
 func readFile(filename string) *bytes.Buffer {
@@ -51,6 +66,7 @@ func convertToJson(rawJson *bytes.Buffer) JiraEvent {
 	fmt.Println(rawJson)
 	err := json.Unmarshal(rawJson.Bytes(), &event)
 	fmt.Println(event.User.Name)
+	fmt.Println("Issue is flagged:", event.Issue.isFlagged())
 	check(err)
 	return event
 }
