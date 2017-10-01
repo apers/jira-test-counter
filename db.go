@@ -3,11 +3,19 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"time"
+
 	_ "github.com/lib/pq"
 )
 
 type JiraDb struct {
 	db *sql.DB
+}
+
+type User struct {
+	Username      string
+	Email         string
+	Blocks_placed int
 }
 
 func dbConnect() JiraDb {
@@ -22,21 +30,40 @@ func dbConnect() JiraDb {
 	return jiraDb
 }
 
-func (db JiraDb) exec(sql string) sql.Result {
-	res, err := db.db.Exec(sql)
+func (db JiraDb) addTask(username string, taskType string, key string) {
+	stmt, err := db.db.Prepare("INSERT INTO tasks(username, type, key, time) VALUES($1, $2, $3, $4)")
 	check(err)
-	return res
+	_, err = stmt.Exec(username, taskType, key, time.Now())
+	check(err)
+}
+
+func (db JiraDb) createUser(username string, email string) {
+	fmt.Println("Creating user: ", username)
+	stmt, err := db.db.Prepare("INSERT INTO users(username, email) VALUES($1, $2)")
+	check(err)
+	_, err = stmt.Exec(username, email)
+	check(err)
+}
+
+func (db JiraDb) getUser(username string) (error, User) {
+	var user User
+	err := db.db.QueryRow("SELECT username, email, blocks_placed FROM users WHERE username=$1", username).Scan(&user.Username, &user.Email, &user.Blocks_placed)
+
+	if err != nil && err != sql.ErrNoRows {
+		check(err)
+	}
+
+	return err, user
 }
 
 func (db JiraDb) cleanTables() {
 	fmt.Println("Cleaning tables..")
 
-	_, err := db.db.Exec("DROP TABLE Users")
+	_, err := db.db.Exec("DROP TABLE tasks")
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	_, err = db.db.Exec("DROP TABLE Tasks")
+	_, err = db.db.Exec("DROP TABLE users")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -45,10 +72,9 @@ func (db JiraDb) cleanTables() {
 func (db JiraDb) initTables() {
 	fmt.Println("Initializing tables..")
 
-	_, err := db.db.Exec(
-		`create table users (
-			id serial primary key,
-			username varchar(50),
+	_, err := db.db.Exec(`
+		create table users (
+			username varchar(50) primary key,
 			email varchar(100),
 			blocks_placed integer DEFAULT 0
 		);`)
@@ -57,7 +83,15 @@ func (db JiraDb) initTables() {
 		fmt.Println(err)
 	}
 
-	_, err = db.db.Exec("DROP TABLE Tasks")
+	_, err = db.db.Exec(`
+		create table tasks (
+			  id serial primary key,
+			  username varchar(50) references users(username),
+			  type varchar(50),
+			  key varchar(50),
+			  time timestamp
+		);`)
+
 	if err != nil {
 		fmt.Println(err)
 	}

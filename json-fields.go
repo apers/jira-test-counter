@@ -1,12 +1,12 @@
 package main
 
 type JiraEvent struct {
-	User      User      `json:"user" `
+	User      JsonUser  `json:"user" `
 	Issue     Issue     `json:"issue"`
 	ChangeLog ChangeLog `json:"changelog"`
 }
 
-type User struct {
+type JsonUser struct {
 	Name  string `json:"name"`
 	Email string `json:"emailAddress"`
 }
