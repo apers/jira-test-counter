@@ -27,7 +27,7 @@ type Issue struct {
 }
 
 type Fields struct {
-	Flagged []CustomField `json:"customfield_10200"`
+	Flagged []CustomField `json:"customfield_10602"`
 }
 
 type CustomField struct {

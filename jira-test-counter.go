@@ -16,8 +16,8 @@ const ServerPort = "80"
 var db JiraDb
 
 const DevelopmentCol = "In Progress"
-const CodeReviewCol = "Code Review"
-const TestCol = "Test"
+const CodeReviewCol = "Klar til code review"
+const TestCol = "Testbar"
 const DoneCol = "Done"
 
 const TaskTypeTest = "test"
@@ -52,9 +52,10 @@ func convertToJson(rawJson *bytes.Buffer) JiraEvent {
 
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
-
+    if buf.Len() == 0 {
+        return
+    }
 	event := convertToJson(buf)
-
 	if event.ChangeLog.hasStatusChange() && event.Issue.isFlagged() {
 		from, to := event.ChangeLog.getStausChange()
 		var taskType string
