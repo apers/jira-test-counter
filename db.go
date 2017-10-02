@@ -56,6 +56,17 @@ func (db JiraDb) getUser(username string) (error, User) {
 	return err, user
 }
 
+func (db JiraDb) getUserStats(username string) (error, int) {
+	var taskCount int
+	err := db.db.QueryRow("SELECT count(*) FROM tasks WHERE username=$1", username).Scan(&taskCount)
+
+	if err != nil && err != sql.ErrNoRows {
+		check(err)
+	}
+
+	return err, taskCount
+}
+
 func (db JiraDb) cleanTables() {
 	fmt.Println("Cleaning tables..")
 

@@ -50,7 +50,7 @@ func convertToJson(rawJson *bytes.Buffer) JiraEvent {
 	return event
 }
 
-func requestHandler(w http.ResponseWriter, r *http.Request) {
+func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
 
 	event := convertToJson(buf)
@@ -99,6 +99,7 @@ func main() {
 	db.cleanTables()
 	db.initTables()
 
-	http.HandleFunc("/webhook", requestHandler)
+	http.HandleFunc("/webhook", webhookHandler)
+	http.HandleFunc("/stats", statsHandler)
 	log.Fatal(http.ListenAndServe(":"+ServerPort, nil))
 }
