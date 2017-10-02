@@ -41,6 +41,7 @@ func (db JiraDb) addTask(username string, taskType string, key string) {
 
 func (db JiraDb) getAllTaskCount() *sql.Rows {
 	stmt, err := db.db.Prepare("SELECT username, count(*) FROM users u JOIN tasks t ON u.username = t.username GROUP BY username")
+	defer stmt.Close()
 	check(err)
 	res, err := stmt.Query()
 	check(err)
@@ -52,6 +53,7 @@ func (db JiraDb) getAllTaskCount() *sql.Rows {
 func (db JiraDb) createUser(username string, email string) {
 	fmt.Println("Creating user: ", username)
 	stmt, err := db.db.Prepare("INSERT INTO users(username, email) VALUES($1, $2)")
+	defer stmt.Close()
 	check(err)
 	_, err = stmt.Exec(username, email)
 	check(err)

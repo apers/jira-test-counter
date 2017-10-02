@@ -52,9 +52,9 @@ func convertToJson(rawJson *bytes.Buffer) JiraEvent {
 
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
-    if buf.Len() == 0 {
-        return
-    }
+	if buf.Len() == 0 {
+		return
+	}
 	event := convertToJson(buf)
 	if event.ChangeLog.hasStatusChange() && event.Issue.isFlagged() {
 		from, to := event.ChangeLog.getStausChange()
@@ -93,7 +93,13 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func statsHandler(w http.ResponseWriter, r *http.Request) {
-
+	var username string
+	var count int
+	rows := db.getAllTaskCount()
+	for rows.Next() {
+		rows.Scan(username, count)
+		fmt.Fprint(w, "%s - %d", username, count)
+	}
 }
 
 func main() {
@@ -106,5 +112,5 @@ func main() {
 
 	http.HandleFunc("/webhook", webhookHandler)
 	http.HandleFunc("/stats", statsHandler)
-	log.Fatal(http.ListenAndServe(":"+ServerPort, nil))
+	log.Fatal(http.ListenAndServe(":" + ServerPort, nil))
 }
