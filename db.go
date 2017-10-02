@@ -30,12 +30,24 @@ func dbConnect() JiraDb {
 	return jiraDb
 }
 
+/* Tasks */
+
 func (db JiraDb) addTask(username string, taskType string, key string) {
 	stmt, err := db.db.Prepare("INSERT INTO tasks(username, type, key, time) VALUES($1, $2, $3, $4)")
 	check(err)
 	_, err = stmt.Exec(username, taskType, key, time.Now())
 	check(err)
 }
+
+func (db JiraDb) getAllTaskCount() *sql.Rows {
+	stmt, err := db.db.Prepare("SELECT username, count(*) FROM users u JOIN tasks t ON u.username = t.username GROUP BY username")
+	check(err)
+	res, err := stmt.Query()
+	check(err)
+	return res
+}
+
+/* User*/
 
 func (db JiraDb) createUser(username string, email string) {
 	fmt.Println("Creating user: ", username)
@@ -66,6 +78,8 @@ func (db JiraDb) getUserStats(username string) (error, int) {
 
 	return err, taskCount
 }
+
+/* Tables */
 
 func (db JiraDb) cleanTables() {
 	fmt.Println("Cleaning tables..")

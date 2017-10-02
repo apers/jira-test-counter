@@ -91,6 +91,10 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func statsHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func main() {
 	fmt.Println(time.Now())
 	fmt.Println("Staring server..")
