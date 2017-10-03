@@ -40,7 +40,7 @@ func (db JiraDb) addTask(username string, taskType string, key string) {
 }
 
 func (db JiraDb) getAllTaskCount() *sql.Rows {
-	stmt, err := db.db.Prepare("SELECT username, count(*) FROM users u JOIN tasks t ON u.username = t.username GROUP BY username")
+	stmt, err := db.db.Prepare("SELECT u.username, count(*) FROM users u JOIN tasks t ON u.username = t.username GROUP BY u.username;")
 	defer stmt.Close()
 	check(err)
 	res, err := stmt.Query()
