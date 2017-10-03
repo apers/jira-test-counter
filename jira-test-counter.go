@@ -98,7 +98,7 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	rows := db.getAllTaskCount()
 	for rows.Next() {
 		rows.Scan(username, count)
-		fmt.Fprint(w, "%s - %d", username, count)
+		fmt.Fprint(w, "Username: ", username, ", ", count)
 	}
 }
 
