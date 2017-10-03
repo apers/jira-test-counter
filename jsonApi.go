@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"encoding/json"
+	"fmt"
 )
 
 type UserStats struct {
@@ -18,7 +19,9 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		userStats = &UserStats{}
 		rows.Scan(userStats.Username, userStats.Tasks)
+		fmt.Println(userStats)
 		userStatsArr = append(userStatsArr, userStats)
+		fmt.Println(userStatsArr)
 	}
 
 	js, err := json.Marshal(userStatsArr)
