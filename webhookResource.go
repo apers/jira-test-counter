@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+const NotPassedCol = "Ikke passert"
 const DevelopmentCol = "In Progress"
 const CodeReviewCol = "Klar til code review"
 const TestCol = "Testbar"
@@ -37,13 +38,13 @@ func webHookHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeTest
-		} else if from == CodeReviewCol && to == DevelopmentCol {
+		} else if from == CodeReviewCol && to == NotPassedCol {
 			fmt.Println("CodeReview")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeReview
-		} else if from == TestCol && to == DevelopmentCol {
+		} else if from == TestCol && to == NotPassedCol {
 			fmt.Println("CodeReview")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)
