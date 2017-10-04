@@ -24,7 +24,7 @@ func main() {
 	fmt.Println("Staring server..")
 
 	db = dbConnect()
-	db.cleanTables()
+	//db.cleanTables()
 	db.initTables()
 
 	http.HandleFunc("/webhook", webHookHandler)

@@ -6,25 +6,28 @@ import (
 	"fmt"
 )
 
+type UserStatsCollection struct {
+    Users []*UserStats
+}
+
 type UserStats struct {
 	Username string
 	Tasks    int
 }
 
 func statsHandler(w http.ResponseWriter, r *http.Request) {
-	var userStatsArr []*UserStats
+    var statsColl UserStatsCollection
 	var userStats *UserStats
 
 	rows := db.getAllTaskCount()
 	for rows.Next() {
 		userStats = &UserStats{}
-		rows.Scan(userStats.Username, userStats.Tasks)
+		rows.Scan(&userStats.Username, &userStats.Tasks)
 		fmt.Println(userStats)
-		userStatsArr = append(userStatsArr, userStats)
-		fmt.Println(userStatsArr)
+		statsColl.Users = append(statsColl.Users, userStats)
 	}
 
-	js, err := json.Marshal(userStatsArr)
+	js, err := json.Marshal(statsColl)
 	check(err)
 
 	w.Header().Set("Content-Type", "application/json")
