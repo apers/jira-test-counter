@@ -6,6 +6,14 @@ import (
 	"time"
 )
 
+const DevelopmentCol = "In Progress"
+const CodeReviewCol = "Klar til code review"
+const TestCol = "Testbar"
+const DoneCol = "Done"
+
+const TaskTypeTest = "test"
+const TaskTypeReview = "review"
+
 func webHookHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
 	if buf.Len() == 0 {
@@ -14,18 +22,30 @@ func webHookHandler(w http.ResponseWriter, r *http.Request) {
 	event := convertToJson(buf)
 	if event.ChangeLog.hasStatusChange() && event.Issue.isFlagged() {
 		from, to := event.ChangeLog.getStausChange()
+		fmt.Println("From: ", from);
+		fmt.Println("To: ", to);
 		var taskType string
 		if from == CodeReviewCol && to == TestCol {
 			fmt.Println("CodeReview")
 			fmt.Println("PF: ", event.Issue.Key)
-			fmt.Println("Flagged: ", event.Issue.isFlagged())
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeReview
 		} else if from == TestCol && to == DoneCol {
 			fmt.Println("Test")
 			fmt.Println("PF: ", event.Issue.Key)
-			fmt.Println("Flagged: ", event.Issue.isFlagged())
+			fmt.Println("User: ", event.User.Name)
+
+			taskType = TaskTypeTest
+		} else if from == CodeReviewCol && to == DevelopmentCol {
+			fmt.Println("CodeReview")
+			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("User: ", event.User.Name)
+
+			taskType = TaskTypeReview
+		} else if from == TestCol && to == DevelopmentCol {
+			fmt.Println("CodeReview")
+			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeTest

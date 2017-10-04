@@ -11,14 +11,6 @@ const ServerPort = "80"
 
 var db JiraDb
 
-const DevelopmentCol = "In Progress"
-const CodeReviewCol = "Klar til code review"
-const TestCol = "Testbar"
-const DoneCol = "Done"
-
-const TaskTypeTest = "test"
-const TaskTypeReview = "review"
-
 func main() {
 	fmt.Println(time.Now())
 	fmt.Println("Staring server..")
