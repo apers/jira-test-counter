@@ -7,7 +7,7 @@ import (
 )
 
 type UserStatsCollection struct {
-    Users []*UserStats
+	Users []*UserStats
 }
 
 type UserStats struct {
@@ -16,7 +16,16 @@ type UserStats struct {
 }
 
 func statsHandler(w http.ResponseWriter, r *http.Request) {
-    var statsColl UserStatsCollection
+	if r.Method == "POST" {
+		buf := readReader(r.Body)
+		if buf.Len() == 0 {
+			return
+		}
+		mineCraftEvent := convertToUpdateBlockCountJson(buf)
+		db.updateAvailableBlocks(mineCraftEvent.Username, mineCraftEvent.AvailableBlocks)
+	}
+
+	var statsColl UserStatsCollection
 	var userStats *UserStats
 
 	rows := db.getAllTaskCount()

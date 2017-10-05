@@ -22,7 +22,7 @@ func webHookHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	event := convertToJson(buf)
 	if event.ChangeLog.hasStatusChange() && event.Issue.isFlagged() {
-		from, to := event.ChangeLog.getStausChange()
+		from, to := event.ChangeLog.getStatusChange()
 		fmt.Println("From: ", from);
 		fmt.Println("To: ", to);
 		var taskType string

@@ -1,5 +1,10 @@
 package main
 
+type MinecraftEvent struct {
+	Username string `json:"username"`
+	AvailableBlocks int `json:"availableBlocks"`
+}
+
 type JiraEvent struct {
 	User      JsonUser  `json:"user" `
 	Issue     Issue     `json:"issue"`
@@ -51,7 +56,7 @@ func (changelog ChangeLog) hasStatusChange() bool {
 	return false
 }
 
-func (changelog ChangeLog) getStausChange() (string, string) {
+func (changelog ChangeLog) getStatusChange() (string, string) {
 	for _, v := range changelog.Entries {
 		if v.Field == "status" {
 			return v.From, v.To

@@ -15,7 +15,7 @@ type JiraDb struct {
 type User struct {
 	Username      string
 	Email         string
-	Blocks_placed int
+	AvailableBlocks int
 }
 
 func dbConnect() JiraDb {
@@ -39,8 +39,24 @@ func (db JiraDb) addTask(username string, taskType string, key string) {
 	check(err)
 }
 
+func (db JiraDb) addToAvailableBlocks(username string, taskType string) {
+
+	blockCount := 0
+
+	if taskType == TaskTypeReview {
+		blockCount = 5
+	} else if taskType == TaskTypeTest {
+		blockCount = 3
+	}
+
+	stmt, err := db.db.Prepare("UPDATE users SET available_blocks = $1 WHERE username = $2")
+	check(err)
+	_, err = stmt.Exec(blockCount, username)
+	check(err)
+}
+
 func (db JiraDb) getAllTaskCount() *sql.Rows {
-	stmt, err := db.db.Prepare("SELECT u.username, count(*) FROM users u JOIN tasks t ON u.username = t.username GROUP BY u.username;")
+	stmt, err := db.db.Prepare("SELECT username, available_blocks FROM users")
 	defer stmt.Close()
 	check(err)
 	res, err := stmt.Query()
@@ -61,13 +77,22 @@ func (db JiraDb) createUser(username string, email string) {
 
 func (db JiraDb) getUser(username string) (error, User) {
 	var user User
-	err := db.db.QueryRow("SELECT username, email, blocks_placed FROM users WHERE username=$1", username).Scan(&user.Username, &user.Email, &user.Blocks_placed)
+	err := db.db.QueryRow("SELECT username, email, available_blocks FROM users WHERE username=$1", username).Scan(&user.Username, &user.Email, &user.AvailableBlocks)
 
 	if err != nil && err != sql.ErrNoRows {
 		check(err)
 	}
 
 	return err, user
+}
+
+func (db JiraDb) updateAvailableBlocks(username string, availableBlocks int) {
+	fmt.Println("Updating available blocks for user: ", username)
+	stmt, err := db.db.Prepare("UPDATE users SET available_blocks = $1 WHERE username = $2")
+	defer stmt.Close()
+	check(err)
+	_, err = stmt.Exec(availableBlocks, username)
+	check(err)
 }
 
 func (db JiraDb) getUserStats(username string) (error, int) {
@@ -103,7 +128,7 @@ func (db JiraDb) initTables() {
 		create table users (
 			username varchar(50) primary key,
 			email varchar(100),
-			blocks_placed integer DEFAULT 0
+			available_blocks integer DEFAULT 0
 		);`)
 
 	if err != nil {
