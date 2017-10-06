@@ -15,38 +15,26 @@ const DoneCol = "Done"
 const TaskTypeTest = "test"
 const TaskTypeReview = "review"
 
-func webHookHandler(w http.ResponseWriter, r *http.Request) {
+func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
 	if buf.Len() == 0 {
 		return
 	}
-	event := convertToJson(buf)
+	event := convertToJiraJson(buf)
 	if event.ChangeLog.hasStatusChange() && event.Issue.isFlagged() {
 		from, to := event.ChangeLog.getStatusChange()
-		fmt.Println("From: ", from);
-		fmt.Println("To: ", to);
 		var taskType string
 		if from == CodeReviewCol && to == TestCol {
 			fmt.Println("CodeReview")
 			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("Flagged: ", event.Issue.isFlagged())
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeReview
 		} else if from == TestCol && to == DoneCol {
 			fmt.Println("Test")
 			fmt.Println("PF: ", event.Issue.Key)
-			fmt.Println("User: ", event.User.Name)
-
-			taskType = TaskTypeTest
-		} else if from == CodeReviewCol && to == NotPassedCol {
-			fmt.Println("CodeReview")
-			fmt.Println("PF: ", event.Issue.Key)
-			fmt.Println("User: ", event.User.Name)
-
-			taskType = TaskTypeReview
-		} else if from == TestCol && to == NotPassedCol {
-			fmt.Println("CodeReview")
-			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("Flagged: ", event.Issue.isFlagged())
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeTest
@@ -63,7 +51,7 @@ func webHookHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		db.addTask(event.User.Name, taskType, event.Issue.Key)
-
+		db.addToAvailableBlocks(event.User.Name, taskType)
 	} else {
 		fmt.Println("Non-status event..", time.Now())
 	}
