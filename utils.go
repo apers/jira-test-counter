@@ -5,12 +5,22 @@ import (
 	"io"
 	"bytes"
 	"encoding/json"
+	"os"
 )
 
 func check(e error) {
 	if e != nil {
 		log.Fatal(e)
 	}
+}
+
+
+
+func readFile(filename string) *bytes.Buffer {
+	file, err := os.Open(filename)
+	defer file.Close()
+	check(err)
+	return readReader(file)
 }
 
 func readReader(reader io.Reader) *bytes.Buffer {

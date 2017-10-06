@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"fmt"
+	"bytes"
 )
 
 type UserStatsCollection struct {
@@ -13,6 +14,21 @@ type UserStatsCollection struct {
 type UserStats struct {
 	Username string
 	Tasks    int
+}
+
+func convertToJiraJson(rawJson *bytes.Buffer) JiraEvent {
+	var event JiraEvent
+	err := json.Unmarshal(rawJson.Bytes(), &event)
+	check(err)
+	return event
+}
+
+func convertToUpdateBlockCountJson(rawJson *bytes.Buffer) MinecraftEvent {
+	fmt.Println("RawJson: ", rawJson);
+	var event MinecraftEvent
+	err := json.Unmarshal(rawJson.Bytes(), &event)
+	check(err)
+	return event
 }
 
 func statsHandler(w http.ResponseWriter, r *http.Request) {
