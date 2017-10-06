@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -14,14 +13,6 @@ import (
 const ServerPort = "80"
 
 var db JiraDb
-
-const DevelopmentCol = "In Progress"
-const CodeReviewCol = "Klar til code review"
-const TestCol = "Testbar"
-const DoneCol = "Done"
-
-const TaskTypeTest = "test"
-const TaskTypeReview = "review"
 
 func readFile(filename string) *bytes.Buffer {
 	file, err := os.Open(filename)
@@ -91,7 +82,7 @@ func main() {
 	fmt.Println("Staring server..")
 
 	db = dbConnect()
-	db.cleanTables()
+	//db.cleanTables()
 	db.initTables()
 
 	http.HandleFunc("/webhook", webhookHandler)
