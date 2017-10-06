@@ -17,10 +17,12 @@ type UserStats struct {
 
 func statsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
+        fmt.Println(r.Body)
 		buf := readReader(r.Body)
 		if buf.Len() == 0 {
 			return
 		}
+        fmt.Println("Finished reading")
 		mineCraftEvent := convertToUpdateBlockCountJson(buf)
 		db.updateAvailableBlocks(mineCraftEvent.Username, mineCraftEvent.AvailableBlocks)
 	}
