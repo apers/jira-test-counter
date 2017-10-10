@@ -44,12 +44,14 @@ func (db JiraDb) addToAvailableBlocks(username string, taskType string) {
 	blockCount := 0
 
 	if taskType == TaskTypeReview {
-		blockCount = 5
+		blockCount = 6
 	} else if taskType == TaskTypeTest {
-		blockCount = 3
+		blockCount = 4
+	} else if taskType == TaskTypeDev {
+		blockCount = 2
 	}
 
-	stmt, err := db.db.Prepare("UPDATE users SET available_blocks = $1 WHERE username = $2")
+	stmt, err := db.db.Prepare("UPDATE users SET available_blocks = available_blocks + $1 WHERE username = $2")
 	check(err)
 	_, err = stmt.Exec(blockCount, username)
 	check(err)
