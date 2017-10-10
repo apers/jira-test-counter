@@ -12,8 +12,9 @@ const CodeReviewCol = "Klar til code review"
 const TestCol = "Testbar"
 const DoneCol = "Done"
 
-const TaskTypeTest = "test"
+const TaskTypeDev = "development"
 const TaskTypeReview = "review"
+const TaskTypeTest = "test"
 
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
@@ -38,6 +39,13 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeTest
+		} else if from == TestCol && to == DoneCol {
+			fmt.Println("Development")
+			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("Flagged: ", event.Issue.isFlagged())
+			fmt.Println("User: ", event.User.Name)
+
+			taskType = TaskTypeDev
 		} else {
 			// Unspported task
 			return
