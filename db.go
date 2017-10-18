@@ -149,4 +149,19 @@ func (db JiraDb) initTables() {
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	_, err = db.db.Exec(`
+		create table blocks (
+			  username varchar(50) references users(username),
+			  material varchar(50),
+			  x int,
+			  y int,
+			  z int,
+			  PRIMARY KEY(x, y, z)
+			  time timestamp
+		);`)
+
+	if err != nil {
+		fmt.Println(err)
+	}
 }
