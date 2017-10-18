@@ -157,7 +157,7 @@ func (db JiraDb) initTables() {
 			  x int,
 			  y int,
 			  z int,
-			  PRIMARY KEY(x, y, z)
+			  PRIMARY KEY(x, y, z),
 			  time timestamp
 		);`)
 
