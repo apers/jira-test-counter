@@ -39,7 +39,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeTest
-		} else if from == TestCol && to == DoneCol {
+		} else if from == DevelopmentCol && to == CodeReviewCol {
 			fmt.Println("Development")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("Flagged: ", event.Issue.isFlagged())
