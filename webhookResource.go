@@ -18,6 +18,7 @@ const TaskTypeTest = "test"
 
 func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
+
 	if buf.Len() == 0 {
 		return
 	}
@@ -28,19 +29,19 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 	if event.ChangeLog.hasStatusChange() {
 		from, to := event.ChangeLog.getStatusChange()
 		var taskType string
-		if from == CodeReviewCol && to == TestCol {
+		if from == CodeReviewCol && to == TestCol && event.Issue.getAssignee() != event.User.Name {
 			fmt.Println("CodeReview")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeReview
-		} else if from == TestCol && to == DoneCol {
+		} else if from == TestCol && to == DoneCol && event.Issue.getAssignee() != event.User.Name {
 			fmt.Println("Test")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeTest
-		} else if from == DevelopmentCol && to == CodeReviewCol {
+		} else if from == DevelopmentCol && to == CodeReviewCol && event.Issue.getAssignee() == event.User.Name {
 			fmt.Println("Development")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)

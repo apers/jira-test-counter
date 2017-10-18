@@ -33,10 +33,19 @@ type Issue struct {
 
 type Fields struct {
 	Flagged []CustomField `json:"customfield_10602"`
+	Assignee Assignee `json:"assignee"`
+}
+
+type Assignee struct {
+	Name string `json:"name"`
 }
 
 type CustomField struct {
 	Value string `json:"value"`
+}
+
+func (issue Issue) getAssignee() string {
+	return issue.Fields.Assignee.Name
 }
 
 func (issue Issue) isFlagged() bool {
