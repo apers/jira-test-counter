@@ -23,8 +23,6 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println(buf)
-
 	event := convertToJiraJson(buf)
 	if event.ChangeLog.hasStatusChange() {
 		from, to := event.ChangeLog.getStatusChange()
