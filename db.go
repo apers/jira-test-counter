@@ -25,7 +25,7 @@ type User struct {
 
 /* db connections */
 
-func dbconnect() JiraDb {
+func dbConnect() JiraDb {
 	db, err := sql.Open("postgres", "user=jira dbname=jira password=jira")
 	check(err)
 	err = db.Ping()
@@ -115,7 +115,7 @@ func (db JiraDb) getUserStats(username string) (error, int) {
 	return err, taskcount
 }
 
-/* tables and migrations */
+/* Tables and Migrations */
 
 func (db JiraDb) cleanTables() {
 	fmt.Println("cleaning tables..")
@@ -192,24 +192,13 @@ type MigrationEntry struct {
 	version int `json:"version"`
 }
 
-
-/*
-{
-  "migrations": [
-    {
-      "source": "1.sql",
-      "version": "1"
-    }
-  ]
-}
-*/
 func (db JiraDb) migrate() {
 	log.Print("migrating..")
 
 	var migrations Migrations
 
 	file := readFile("./sql-update/migrations.json")
-	err := json.Unmarshal(file.Bytes(), &migrations)
+	err := json.Unmarshal(file.Bytes, &migrations)
 
 	check(err)
 

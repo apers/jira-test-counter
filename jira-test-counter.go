@@ -15,9 +15,8 @@ func main() {
 	fmt.Println(time.Now())
 	fmt.Println("Staring server..")
 
-	//db = dbConnect()
-	//db.initTables()
-	db.migrate()
+	db = dbConnect()
+	db.initTables()
 
 	http.HandleFunc("/webhook", webHookHandler)
 	http.HandleFunc("/stats", statsHandler)
