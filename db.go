@@ -14,7 +14,7 @@ import (
 /* objects */
 
 type jiradb struct {
-	db *sql.db
+	db *sql.DB
 }
 
 type user struct {
@@ -26,9 +26,9 @@ type user struct {
 /* db connections */
 
 func dbconnect() jiradb {
-	db, err := sql.open("postgres", "user=jira dbname=jira password=jira")
+	db, err := sql.Open("postgres", "user=jira dbname=jira password=jira")
 	check(err)
-	err = db.ping()
+	err = db.Ping()
 	check(err)
 
 	var jiradb jiradb
@@ -39,76 +39,76 @@ func dbconnect() jiradb {
 
 /* tasks */
 
-func (db jiradb) addtask(username string, tasktype string, key string, summary string) {
-	stmt, err := db.db.prepare("insert into tasks(username, type, key, summary, time) values($1, $2, $3, $4, $5)")
+func (db jiradb) addTask(username string, tasktype string, key string, summary string) {
+	stmt, err := db.db.Prepare("insert into tasks(username, type, key, summary, time) values($1, $2, $3, $4, $5)")
 	check(err)
-	_, err = stmt.exec(username, tasktype, key, summary, time.now())
+	_, err = stmt.Exec(username, tasktype, key, summary, time.Now())
 	check(err)
 }
 
-func (db jiradb) addtoavailableblocks(username string, tasktype string) {
+func (db jiradb) addToAvailableBlocks(username string, tasktype string) {
 
 	blockcount := 0
 
-	if tasktype == tasktypereview {
+	if tasktype == TaskTypeReview{
 		blockcount = 6
-	} else if tasktype == tasktypetest {
+	} else if tasktype == TaskTypeTest {
+		blockcount = 8
+	} else if tasktype == TaskTypeDev {
 		blockcount = 4
-	} else if tasktype == tasktypedev {
-		blockcount = 2
 	}
 
-	stmt, err := db.db.prepare("update users set available_blocks = available_blocks + $1 where username = $2")
+	stmt, err := db.db.Prepare("update users set available_blocks = available_blocks + $1 where username = $2")
 	check(err)
-	_, err = stmt.exec(blockcount, username)
+	_, err = stmt.Exec(blockcount, username)
 	check(err)
 }
 
-func (db jiradb) getalltaskcount() *sql.rows {
-	stmt, err := db.db.prepare("select username, available_blocks from users")
-	defer stmt.close()
+func (db jiradb) getAllTaskCount() *sql.Rows {
+	stmt, err := db.db.Prepare("select username, available_blocks from users")
+	defer stmt.Close()
 	check(err)
-	res, err := stmt.query()
+	res, err := stmt.Query()
 	check(err)
 	return res
 }
 
 /* user*/
 
-func (db jiradb) createuser(username string, email string) {
-	fmt.println("creating user: ", username)
-	stmt, err := db.db.prepare("insert into users(username, email) values($1, $2)")
-	defer stmt.close()
+func (db jiradb) createUser(username string, email string) {
+	fmt.Println("creating user: ", username)
+	stmt, err := db.db.Prepare("insert into users(username, email) values($1, $2)")
+	defer stmt.Close()
 	check(err)
-	_, err = stmt.exec(username, email)
+	_, err = stmt.Exec(username, email)
 	check(err)
 }
 
 func (db jiradb) getuser(username string) (error, user) {
 	var user user
-	err := db.db.queryrow("select username, email, available_blocks from users where username=$1", username).scan(&user.username, &user.email, &user.availableblocks)
+	err := db.db.QueryRow("select username, email, available_blocks from users where username=$1", username).scan(&user.username, &user.email, &user.availableblocks)
 
-	if err != nil && err != sql.errnorows {
+	if err != nil && err != sql.ErrNoRows {
 		check(err)
 	}
 
 	return err, user
 }
 
-func (db jiradb) updateavailableblocks(username string, availableblocks int) {
-	fmt.println("updating available blocks for user: ", username)
-	stmt, err := db.db.prepare("update users set available_blocks = $1 where username = $2")
-	defer stmt.close()
+func (db jiradb) updateAvailableBlocks(username string, availableblocks int) {
+	fmt.Println("updating available blocks for user: ", username)
+	stmt, err := db.db.Prepare("update users set available_blocks = $1 where username = $2")
+	defer stmt.Close()
 	check(err)
-	_, err = stmt.exec(availableblocks, username)
+	_, err = stmt.Exec(availableblocks, username)
 	check(err)
 }
 
-func (db jiradb) getuserstats(username string) (error, int) {
+func (db jiradb) getUserStats(username string) (error, int) {
 	var taskcount int
-	err := db.db.queryrow("select count(*) from tasks where username=$1", username).scan(&taskcount)
+	err := db.db.QueryRow("select count(*) from tasks where username=$1", username).Scan(&taskcount)
 
-	if err != nil && err != sql.errnorows {
+	if err != nil && err != sql.ErrNoRows {
 		check(err)
 	}
 
@@ -117,23 +117,23 @@ func (db jiradb) getuserstats(username string) (error, int) {
 
 /* tables and migrations */
 
-func (db jiradb) cleantables() {
-	fmt.println("cleaning tables..")
+func (db jiradb) cleanTables() {
+	fmt.Println("cleaning tables..")
 
-	_, err := db.db.exec("drop table tasks")
+	_, err := db.db.Exec("drop table tasks")
 	if err != nil {
-		fmt.println(err)
+		fmt.Println(err)
 	}
-	_, err = db.db.exec("drop table users")
+	_, err = db.db.Exec("drop table users")
 	if err != nil {
-		fmt.println(err)
+		fmt.Println(err)
 	}
 }
 
-func (db jiradb) inittables() {
-	log.print("initializing tables..")
+func (db jiradb) initTables() {
+	log.Print("initializing tables..")
 
-	_, err := db.db.exec(`
+	_, err := db.db.Exec(`
 		create table users (
 			username varchar(50) primary key,
 			email varchar(100),
@@ -141,10 +141,10 @@ func (db jiradb) inittables() {
 		);`)
 
 	if err != nil {
-		fmt.println(err)
+		fmt.Println(err)
 	}
 
-	_, err = db.db.exec(`
+	_, err = db.db.Exec(`
 		create table tasks (
 			  id serial primary key,
 			  username varchar(50) references users(username),
@@ -154,10 +154,10 @@ func (db jiradb) inittables() {
 		);`)
 
 	if err != nil {
-		fmt.println(err)
+		fmt.Println(err)
 	}
 
-	_, err = db.db.exec(`
+	_, err = db.db.Exec(`
 		create table blocks (
 			  username varchar(50) references users(username),
 			  material varchar(50),
@@ -169,34 +169,25 @@ func (db jiradb) inittables() {
 		);`)
 
 	if err != nil {
-		fmt.println(err)
+		fmt.Println(err)
 	}
 
-	_, err = db.db.exec(`
+	_, err = db.db.Exec(`
 		create table sql_update (
 			current_version int primary key,
             		update_time timestamp default now()
 		);`)
 
 	if err != nil {
-		fmt.println(err)
+		fmt.Println(err)
 	}
 }
 
-type userstatscollection struct {
-	users []*userstats
-}
-
-type userstats struct {
-	username string
-	tasks    int
-}
-
 type migrations struct {
-	migrationentries []migrationentry `json:"migrations"`
+	migrationEntries []migrationEntry `json:"migrations"`
 }
 
-type migrationentry struct {
+type migrationEntry struct {
 	source  string `json:"source"`
 	version int `json:"version"`
 }
@@ -213,17 +204,17 @@ type migrationentry struct {
 }
 */
 func (db jiradb) migrate() {
-	log.print("migrating..")
+	log.Print("migrating..")
 
 	var migrations migrations
 
-	file := readfile("./sql-update/migrations.json")
-	err := json.unmarshal(file.bytes(), &migrations)
+	file := readFile("./sql-update/migrations.json")
+	err := json.Unmarshal(file.Bytes(), &migrations)
 
 	check(err)
 
-	for _, migrationentry := range migrations.migrationentries {
-		fmt.println(migrationentry);
+	for _, migrationEntry := range migrations.migrationEntries {
+		fmt.Println(migrationEntry);
 	}
 
 }
