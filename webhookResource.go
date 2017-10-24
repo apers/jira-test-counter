@@ -77,7 +77,7 @@ func webHookHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			db.createUser(event.User.Name, event.User.Email)
 		}
-		fmt.Println("event: ", event)
+
 		db.addTask(event.User.Name, taskType, event.Issue.Key, event.Issue.Fields.Summary)
 		db.addToAvailableBlocks(event.User.Name, taskType)
 	} else {
