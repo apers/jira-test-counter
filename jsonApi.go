@@ -32,6 +32,8 @@ func convertToUpdateBlockCountJson(rawJson *bytes.Buffer) MinecraftEvent {
 }
 
 func statsHandler(w http.ResponseWriter, r *http.Request) {
+	// Post request coming from mineraft server
+	// Todo - move to own handler and endpoint
 	if r.Method == "POST" {
 		buf := readReader(r.Body)
 		if buf.Len() == 0 {
