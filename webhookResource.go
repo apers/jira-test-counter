@@ -71,7 +71,7 @@ func webHookHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err, _ := db.getuser(event.User.Name)
+		err, _ := db.getUser(event.User.Name)
 
 		// No such user
 		if err != nil {
