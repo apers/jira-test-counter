@@ -47,6 +47,8 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeDev
+		} else if from == TestCol && to == DoneCol && event.Issue.getAssignee() != event.User.Name {
+        }
 		} else {
 			// Unspported task
 			return
