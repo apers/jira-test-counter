@@ -183,11 +183,11 @@ func (db JiraDb) initTables() {
 	}
 }
 
-type migrations struct {
-	migrationEntries []migrationEntry `json:"migrations"`
+type Migrations struct {
+	MigrationEntries []migrationEntry `json:"migrations"`
 }
 
-type migrationEntry struct {
+type MigrationEntry struct {
 	source  string `json:"source"`
 	version int `json:"version"`
 }
@@ -206,14 +206,14 @@ type migrationEntry struct {
 func (db JiraDb) migrate() {
 	log.Print("migrating..")
 
-	var migrations migrations
+	var migrations Migrations
 
 	file := readFile("./sql-update/migrations.json")
 	err := json.Unmarshal(file.Bytes(), &migrations)
 
 	check(err)
 
-	for _, migrationEntry := range migrations.migrationEntries {
+	for _, migrationEntry := range migrations.MigrationEntries {
 		fmt.Println(migrationEntry);
 	}
 
