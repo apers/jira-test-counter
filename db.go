@@ -184,7 +184,7 @@ func (db JiraDb) initTables() {
 }
 
 type Migrations struct {
-	MigrationEntries []migrationEntry `json:"migrations"`
+	MigrationEntries []MigrationEntry `json:"migrations"`
 }
 
 type MigrationEntry struct {
