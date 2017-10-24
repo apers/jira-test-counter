@@ -20,7 +20,7 @@ type JiraDb struct {
 type User struct {
 	username        string
 	email           string
-	availableblocks int
+	availableBlocks int
 }
 
 /* db connections */
@@ -39,28 +39,29 @@ func dbConnect() JiraDb {
 
 /* tasks */
 
-func (db JiraDb) addTask(username string, tasktype string, key string, summary string) {
+func (db JiraDb) addTask(username string, taskType string, key string, summary string) {
+	fmt.Println("summary: ", summary)
 	stmt, err := db.db.Prepare("insert into tasks(username, type, key, summary, time) values($1, $2, $3, $4, $5)")
 	check(err)
-	_, err = stmt.Exec(username, tasktype, key, summary, time.Now())
+	_, err = stmt.Exec(username, taskType, key, summary, time.Now())
 	check(err)
 }
 
-func (db JiraDb) addToAvailableBlocks(username string, tasktype string) {
+func (db JiraDb) addToAvailableBlocks(username string, taskType string) {
 
-	blockcount := 0
+	blockCount := 0
 
-	if tasktype == TaskTypeReview{
-		blockcount = 6
-	} else if tasktype == TaskTypeTest {
-		blockcount = 8
-	} else if tasktype == TaskTypeDev {
-		blockcount = 4
+	if taskType == TaskTypeReview {
+		blockCount = 6
+	} else if taskType == TaskTypeTest {
+		blockCount = 8
+	} else if taskType == TaskTypeDev {
+		blockCount = 4
 	}
 
 	stmt, err := db.db.Prepare("update users set available_blocks = available_blocks + $1 where username = $2")
 	check(err)
-	_, err = stmt.Exec(blockcount, username)
+	_, err = stmt.Exec(blockCount, username)
 	check(err)
 }
 
@@ -86,7 +87,9 @@ func (db JiraDb) createUser(username string, email string) {
 
 func (db JiraDb) getUser(username string) (error, User) {
 	var user User
-	err := db.db.QueryRow("select username, email, available_blocks from users where username=$1", username).Scan(&user.username, &user.email, &user.availableblocks)
+	err := db.db.
+		QueryRow("select username, email, available_blocks from users where username=$1", username).
+		Scan(&user.username, &user.email, &user.availableBlocks)
 
 	if err != nil && err != sql.ErrNoRows {
 		check(err)
@@ -95,12 +98,12 @@ func (db JiraDb) getUser(username string) (error, User) {
 	return err, user
 }
 
-func (db JiraDb) updateAvailableBlocks(username string, availableblocks int) {
+func (db JiraDb) updateAvailableBlocks(username string, availableBlocks int) {
 	fmt.Println("updating available blocks for user: ", username)
 	stmt, err := db.db.Prepare("update users set available_blocks = $1 where username = $2")
 	defer stmt.Close()
 	check(err)
-	_, err = stmt.Exec(availableblocks, username)
+	_, err = stmt.Exec(availableBlocks, username)
 	check(err)
 }
 
@@ -150,6 +153,7 @@ func (db JiraDb) initTables() {
 			  username varchar(50) references users(username),
 			  type varchar(50),
 			  key varchar(50),
+			  summary varchar(200),
 			  time timestamp
 		);`)
 
