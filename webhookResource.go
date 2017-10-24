@@ -16,7 +16,7 @@ const TaskTypeDev = "development"
 const TaskTypeReview = "review"
 const TaskTypeTest = "test"
 
-func webHookHandler(_, r *http.Request) {
+func webHookHandler(w http.ResponseWriter, r *http.Request) {
 	buf := readReader(r.Body)
 
 	if buf.Len() == 0 {
@@ -71,7 +71,7 @@ func webHookHandler(_, r *http.Request) {
 			return
 		}
 
-		err, _ := db.getUser(event.User.Name)
+		err, _ := db.getuser(event.User.Name)
 
 		// No such user
 		if err != nil {

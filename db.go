@@ -84,7 +84,7 @@ func (db JiraDb) createUser(username string, email string) {
 	check(err)
 }
 
-func (db JiraDb) getuser(username string) (error, User) {
+func (db JiraDb) getUser(username string) (error, User) {
 	var user User
 	err := db.db.QueryRow("select username, email, available_blocks from users where username=$1", username).Scan(&user.username, &user.email, &user.availableblocks)
 
