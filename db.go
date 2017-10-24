@@ -198,7 +198,7 @@ func (db JiraDb) migrate() {
 	var migrations Migrations
 
 	file := readFile("./sql-update/migrations.json")
-	err := json.Unmarshal(file.Bytes, &migrations)
+	err := json.Unmarshal(file.Bytes(), &migrations)
 
 	check(err)
 
