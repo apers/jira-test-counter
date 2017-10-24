@@ -6,138 +6,145 @@ import (
 	"time"
 
 	_ "github.com/lib/pq"
+	"encoding/json"
+	"log"
 )
 
-type JiraDb struct {
-	db *sql.DB
+
+/* objects */
+
+type jiradb struct {
+	db *sql.db
 }
 
-type User struct {
-	Username      string
-	Email         string
-	AvailableBlocks int
+type user struct {
+	username        string
+	email           string
+	availableblocks int
 }
 
-func dbConnect() JiraDb {
-	db, err := sql.Open("postgres", "user=jira dbname=jira password=jira")
+/* db connections */
+
+func dbconnect() jiradb {
+	db, err := sql.open("postgres", "user=jira dbname=jira password=jira")
 	check(err)
-	err = db.Ping()
+	err = db.ping()
 	check(err)
 
-	var jiraDb JiraDb
-	jiraDb.db = db
+	var jiradb jiradb
+	jiradb.db = db
 
-	return jiraDb
+	return jiradb
 }
 
-/* Tasks */
+/* tasks */
 
-func (db JiraDb) addTask(username string, taskType string, key string) {
-	stmt, err := db.db.Prepare("INSERT INTO tasks(username, type, key, time) VALUES($1, $2, $3, $4)")
+func (db jiradb) addtask(username string, tasktype string, key string, summary string) {
+	stmt, err := db.db.prepare("insert into tasks(username, type, key, summary, time) values($1, $2, $3, $4, $5)")
 	check(err)
-	_, err = stmt.Exec(username, taskType, key, time.Now())
+	_, err = stmt.exec(username, tasktype, key, summary, time.now())
 	check(err)
 }
 
-func (db JiraDb) addToAvailableBlocks(username string, taskType string) {
+func (db jiradb) addtoavailableblocks(username string, tasktype string) {
 
-	blockCount := 0
+	blockcount := 0
 
-	if taskType == TaskTypeReview {
-		blockCount = 6
-	} else if taskType == TaskTypeTest {
-		blockCount = 4
-	} else if taskType == TaskTypeDev {
-		blockCount = 2
+	if tasktype == tasktypereview {
+		blockcount = 6
+	} else if tasktype == tasktypetest {
+		blockcount = 4
+	} else if tasktype == tasktypedev {
+		blockcount = 2
 	}
 
-	stmt, err := db.db.Prepare("UPDATE users SET available_blocks = available_blocks + $1 WHERE username = $2")
+	stmt, err := db.db.prepare("update users set available_blocks = available_blocks + $1 where username = $2")
 	check(err)
-	_, err = stmt.Exec(blockCount, username)
+	_, err = stmt.exec(blockcount, username)
 	check(err)
 }
 
-func (db JiraDb) getAllTaskCount() *sql.Rows {
-	stmt, err := db.db.Prepare("SELECT username, available_blocks FROM users")
-	defer stmt.Close()
+func (db jiradb) getalltaskcount() *sql.rows {
+	stmt, err := db.db.prepare("select username, available_blocks from users")
+	defer stmt.close()
 	check(err)
-	res, err := stmt.Query()
+	res, err := stmt.query()
 	check(err)
 	return res
 }
 
-/* User*/
+/* user*/
 
-func (db JiraDb) createUser(username string, email string) {
-	fmt.Println("Creating user: ", username)
-	stmt, err := db.db.Prepare("INSERT INTO users(username, email) VALUES($1, $2)")
-	defer stmt.Close()
+func (db jiradb) createuser(username string, email string) {
+	fmt.println("creating user: ", username)
+	stmt, err := db.db.prepare("insert into users(username, email) values($1, $2)")
+	defer stmt.close()
 	check(err)
-	_, err = stmt.Exec(username, email)
+	_, err = stmt.exec(username, email)
 	check(err)
 }
 
-func (db JiraDb) getUser(username string) (error, User) {
-	var user User
-	err := db.db.QueryRow("SELECT username, email, available_blocks FROM users WHERE username=$1", username).Scan(&user.Username, &user.Email, &user.AvailableBlocks)
+func (db jiradb) getuser(username string) (error, user) {
+	var user user
+	err := db.db.queryrow("select username, email, available_blocks from users where username=$1", username).scan(&user.username, &user.email, &user.availableblocks)
 
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && err != sql.errnorows {
 		check(err)
 	}
 
 	return err, user
 }
 
-func (db JiraDb) updateAvailableBlocks(username string, availableBlocks int) {
-	fmt.Println("Updating available blocks for user: ", username)
-	stmt, err := db.db.Prepare("UPDATE users SET available_blocks = $1 WHERE username = $2")
-	defer stmt.Close()
+func (db jiradb) updateavailableblocks(username string, availableblocks int) {
+	fmt.println("updating available blocks for user: ", username)
+	stmt, err := db.db.prepare("update users set available_blocks = $1 where username = $2")
+	defer stmt.close()
 	check(err)
-	_, err = stmt.Exec(availableBlocks, username)
+	_, err = stmt.exec(availableblocks, username)
 	check(err)
 }
 
-func (db JiraDb) getUserStats(username string) (error, int) {
-	var taskCount int
-	err := db.db.QueryRow("SELECT count(*) FROM tasks WHERE username=$1", username).Scan(&taskCount)
+func (db jiradb) getuserstats(username string) (error, int) {
+	var taskcount int
+	err := db.db.queryrow("select count(*) from tasks where username=$1", username).scan(&taskcount)
 
-	if err != nil && err != sql.ErrNoRows {
+	if err != nil && err != sql.errnorows {
 		check(err)
 	}
 
-	return err, taskCount
+	return err, taskcount
 }
 
-/* Tables */
+/* tables and migrations */
 
-func (db JiraDb) cleanTables() {
-	fmt.Println("Cleaning tables..")
+func (db jiradb) cleantables() {
+	fmt.println("cleaning tables..")
 
-	_, err := db.db.Exec("DROP TABLE tasks")
+	_, err := db.db.exec("drop table tasks")
 	if err != nil {
-		fmt.Println(err)
+		fmt.println(err)
 	}
-	_, err = db.db.Exec("DROP TABLE users")
+	_, err = db.db.exec("drop table users")
 	if err != nil {
-		fmt.Println(err)
+		fmt.println(err)
 	}
 }
 
-func (db JiraDb) initTables() {
-	fmt.Println("Initializing tables..")
+func (db jiradb) inittables() {
+	log.print("initializing tables..")
 
-	_, err := db.db.Exec(`
+	_, err := db.db.exec(`
 		create table users (
 			username varchar(50) primary key,
 			email varchar(100),
-			available_blocks integer DEFAULT 0
+			available_blocks integer default 0
 		);`)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.println(err)
 	}
 
-	_, err = db.db.Exec(`
+	_, err = db.db.exec(`
 		create table tasks (
 			  id serial primary key,
 			  username varchar(50) references users(username),
@@ -147,21 +154,76 @@ func (db JiraDb) initTables() {
 		);`)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.println(err)
 	}
 
-	_, err = db.db.Exec(`
+	_, err = db.db.exec(`
 		create table blocks (
 			  username varchar(50) references users(username),
 			  material varchar(50),
 			  x int,
 			  y int,
 			  z int,
-			  PRIMARY KEY(x, y, z),
+			  primary key(x, y, z),
 			  time timestamp
 		);`)
 
 	if err != nil {
-		fmt.Println(err)
+		fmt.println(err)
 	}
+
+	_, err = db.db.exec(`
+		create table sql_update (
+			current_version int primary key,
+            		update_time timestamp default now()
+		);`)
+
+	if err != nil {
+		fmt.println(err)
+	}
+}
+
+type userstatscollection struct {
+	users []*userstats
+}
+
+type userstats struct {
+	username string
+	tasks    int
+}
+
+type migrations struct {
+	migrationentries []migrationentry `json:"migrations"`
+}
+
+type migrationentry struct {
+	source  string `json:"source"`
+	version int `json:"version"`
+}
+
+
+/*
+{
+  "migrations": [
+    {
+      "source": "1.sql",
+      "version": "1"
+    }
+  ]
+}
+*/
+func (db jiradb) migrate() {
+	log.print("migrating..")
+
+	var migrations migrations
+
+	file := readfile("./sql-update/migrations.json")
+	err := json.unmarshal(file.bytes(), &migrations)
+
+	check(err)
+
+	for _, migrationentry := range migrations.migrationentries {
+		fmt.println(migrationentry);
+	}
+
 }

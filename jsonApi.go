@@ -24,7 +24,6 @@ func convertToJiraJson(rawJson *bytes.Buffer) JiraEvent {
 }
 
 func convertToUpdateBlockCountJson(rawJson *bytes.Buffer) MinecraftEvent {
-	fmt.Println("RawJson: ", rawJson);
 	var event MinecraftEvent
 	err := json.Unmarshal(rawJson.Bytes(), &event)
 	check(err)

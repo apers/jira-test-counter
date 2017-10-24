@@ -15,11 +15,12 @@ func main() {
 	fmt.Println(time.Now())
 	fmt.Println("Staring server..")
 
-	db = dbConnect()
-	//db.cleanTables()
-	db.initTables()
+	//db = dbConnect()
+	//db.initTables()
+	db.migrate()
 
-	http.HandleFunc("/webhook", webhookHandler)
+	http.HandleFunc("/webhook", webHookHandler)
 	http.HandleFunc("/stats", statsHandler)
+
 	log.Fatal(http.ListenAndServe(":" + ServerPort, nil))
 }

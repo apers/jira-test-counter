@@ -14,8 +14,6 @@ func check(e error) {
 	}
 }
 
-
-
 func readFile(filename string) *bytes.Buffer {
 	file, err := os.Open(filename)
 	defer file.Close()

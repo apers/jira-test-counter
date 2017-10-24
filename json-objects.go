@@ -34,6 +34,7 @@ type Issue struct {
 type Fields struct {
 	Flagged []CustomField `json:"customfield_10602"`
 	Assignee Assignee `json:"assignee"`
+	Summary string `json:"summary"`
 }
 
 type Assignee struct {

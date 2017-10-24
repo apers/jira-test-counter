@@ -16,7 +16,7 @@ const TaskTypeDev = "development"
 const TaskTypeReview = "review"
 const TaskTypeTest = "test"
 
-func webhookHandler(w http.ResponseWriter, r *http.Request) {
+func webHookHandler(_, r *http.Request) {
 	buf := readReader(r.Body)
 
 	if buf.Len() == 0 {
@@ -78,7 +78,7 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 			db.createUser(event.User.Name, event.User.Email)
 		}
 
-		db.addTask(event.User.Name, taskType, event.Issue.Key)
+		db.addTask(event.User.Name, taskType, event.Issue.Key, event.Issue.Fields.Summary)
 		db.addToAvailableBlocks(event.User.Name, taskType)
 	} else {
 		fmt.Println("Non-status event..", time.Now())
