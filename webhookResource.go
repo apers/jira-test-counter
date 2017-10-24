@@ -30,27 +30,46 @@ func webhookHandler(w http.ResponseWriter, r *http.Request) {
 		from, to := event.ChangeLog.getStatusChange()
 		var taskType string
 		if from == CodeReviewCol && to == TestCol && event.Issue.getAssignee() != event.User.Name {
-			fmt.Println("CodeReview")
+			fmt.Println(time.Now())
+			fmt.Println("CodeReview -> TestCol")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeReview
 		} else if from == TestCol && to == DoneCol && event.Issue.getAssignee() != event.User.Name {
-			fmt.Println("Test")
+			fmt.Println(time.Now())
+			fmt.Println("Test -> Done")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeTest
 		} else if from == DevelopmentCol && to == CodeReviewCol && event.Issue.getAssignee() == event.User.Name {
-			fmt.Println("Development")
+			fmt.Println(time.Now())
+			fmt.Println("Development -> CodeReview")
 			fmt.Println("PF: ", event.Issue.Key)
 			fmt.Println("User: ", event.User.Name)
 
 			taskType = TaskTypeDev
-		} else if from == TestCol && to == DoneCol && event.Issue.getAssignee() != event.User.Name {
-        }
+		} else if from == TestCol && to == NotPassedCol && event.Issue.getAssignee() != event.User.Name {
+			fmt.Println(time.Now())
+			fmt.Println("Test -> NotPassed")
+			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("User: ", event.User.Name)
+
+			taskType = TaskTypeTest
+
+		} else if from == CodeReviewCol && to == NotPassedCol && event.Issue.getAssignee() != event.User.Name {
+			fmt.Println(time.Now())
+			fmt.Println("CodeReview -> NotPassed")
+			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("User: ", event.User.Name)
+
+			taskType = TaskTypeReview
 		} else {
-			// Unspported task
+			fmt.Println(time.Now())
+			fmt.Println("Not supported: ", from, "->" ,to)
+			fmt.Println("PF: ", event.Issue.Key)
+			fmt.Println("User: ", event.User.Name)
 			return
 		}
 

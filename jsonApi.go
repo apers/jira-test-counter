@@ -33,12 +33,10 @@ func convertToUpdateBlockCountJson(rawJson *bytes.Buffer) MinecraftEvent {
 
 func statsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
-        fmt.Println(r.Body)
 		buf := readReader(r.Body)
 		if buf.Len() == 0 {
 			return
 		}
-        fmt.Println("Finished reading")
 		mineCraftEvent := convertToUpdateBlockCountJson(buf)
 		db.updateAvailableBlocks(mineCraftEvent.Username, mineCraftEvent.AvailableBlocks)
 	}
@@ -50,7 +48,6 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		userStats = &UserStats{}
 		rows.Scan(&userStats.Username, &userStats.Tasks)
-		fmt.Println(userStats)
 		statsColl.Users = append(statsColl.Users, userStats)
 	}
 
