@@ -8,18 +8,18 @@ import (
 )
 
 type UserStatsCollection struct {
-	users []*UserStats
-	teams []*TeamStats
+	Users []*UserStats
+	Teams []*TeamStats
 }
 
 type UserStats struct {
-	username         string
-	available_blocks int
+	Username         string
+	Available_blocks int
 }
 
 type TeamStats struct {
-	teamname         string
-	available_blocks int
+	Teamname         string
+	Available_blocks int
 }
 
 type AchievementStat struct {
@@ -59,7 +59,7 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 
 	var statsColl UserStatsCollection
 	var userStats *UserStats
-	var teamStats *TeamStats;
+	var teamStats *TeamStats
 
 	// Read user stats
 	rows := db.getAllTaskCount()
