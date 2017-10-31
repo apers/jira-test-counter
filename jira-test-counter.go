@@ -20,6 +20,7 @@ func main() {
 
 	http.HandleFunc("/webhook", webHookHandler)
 	http.HandleFunc("/stats", statsHandler)
+	http.HandleFunc("/achievementStats", achievementStatsHandler)
 
 	log.Fatal(http.ListenAndServe(":" + ServerPort, nil))
 }

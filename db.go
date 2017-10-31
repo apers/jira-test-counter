@@ -10,7 +10,6 @@ import (
 	"log"
 )
 
-
 /* objects */
 
 type JiraDb struct {
@@ -40,7 +39,7 @@ func dbConnect() JiraDb {
 /* tasks */
 
 func (db JiraDb) addTask(username string, taskType string, key string, summary string) {
-	stmt, err := db.db.Prepare("insert into tasks(username, type, key, summary, time) values($1, $2, $3, $4, $5)")
+	stmt, err := db.db.Prepare("INSERT INTO tasks(username, type, key, summary, time) VALUES($1, $2, $3, $4, $5)")
 	check(err)
 	_, err = stmt.Exec(username, taskType, key, time.Now(), summary)
 	check(err)
@@ -58,14 +57,40 @@ func (db JiraDb) addToAvailableBlocks(username string, taskType string) {
 		blockCount = 4
 	}
 
-	stmt, err := db.db.Prepare("update users set available_blocks = available_blocks + $1 where username = $2")
+	stmt, err := db.db.Prepare("UPDATE users SET available_blocks = available_blocks + $1 WHERE username = $2")
 	check(err)
 	_, err = stmt.Exec(blockCount, username)
 	check(err)
 }
 
 func (db JiraDb) getAllTaskCount() *sql.Rows {
-	stmt, err := db.db.Prepare("select username, available_blocks from users")
+	stmt, err := db.db.Prepare("SELECT username, available_blocks FROM users")
+	defer stmt.Close()
+	check(err)
+	res, err := stmt.Query()
+	check(err)
+	return res
+}
+
+func (db JiraDb) getMainTaskCount() *sql.Rows {
+	stmt, err := db.db.Prepare(`
+		SELECT 'MAIN', COUNT(*)
+		FROM tasks
+		WHERE username IN ('ajo', 'rbr', 'vd', 'kah', 'hvg');`)
+
+	defer stmt.Close()
+	check(err)
+	res, err := stmt.Query()
+	check(err)
+	return res
+}
+
+func (db JiraDb) getCoreTaskCount() *sql.Rows {
+	stmt, err := db.db.Prepare(`
+		SELECT 'CORE', COUNT(*)
+		FROM tasks
+		WHERE username IN ('rmg', 'ap', 'wab', 'jbe', 'tkg');`)
+
 	defer stmt.Close()
 	check(err)
 	res, err := stmt.Query()
@@ -77,7 +102,7 @@ func (db JiraDb) getAllTaskCount() *sql.Rows {
 
 func (db JiraDb) createUser(username string, email string) {
 	fmt.Println("creating user: ", username)
-	stmt, err := db.db.Prepare("insert into users(username, email) values($1, $2)")
+	stmt, err := db.db.Prepare("INSERT INTO users(username, email) VALUES($1, $2)")
 	defer stmt.Close()
 	check(err)
 	_, err = stmt.Exec(username, email)
@@ -87,7 +112,7 @@ func (db JiraDb) createUser(username string, email string) {
 func (db JiraDb) getUser(username string) (error, User) {
 	var user User
 	err := db.db.
-		QueryRow("select username, email, available_blocks from users where username=$1", username).
+		QueryRow("SELECT username, email, available_blocks FROM users WHERE username=$1", username).
 		Scan(&user.username, &user.email, &user.availableBlocks)
 
 	if err != nil && err != sql.ErrNoRows {
@@ -99,7 +124,7 @@ func (db JiraDb) getUser(username string) (error, User) {
 
 func (db JiraDb) updateAvailableBlocks(username string, availableBlocks int) {
 	fmt.Println("updating available blocks for user: ", username)
-	stmt, err := db.db.Prepare("update users set available_blocks = $1 where username = $2")
+	stmt, err := db.db.Prepare("UPDATE users SET available_blocks = $1 WHERE username = $2")
 	defer stmt.Close()
 	check(err)
 	_, err = stmt.Exec(availableBlocks, username)
@@ -108,7 +133,7 @@ func (db JiraDb) updateAvailableBlocks(username string, availableBlocks int) {
 
 func (db JiraDb) getUserStats(username string) (error, int) {
 	var taskcount int
-	err := db.db.QueryRow("select count(*) from tasks where username=$1", username).Scan(&taskcount)
+	err := db.db.QueryRow("SELECT count(*) FROM tasks WHERE username=$1", username).Scan(&taskcount)
 
 	if err != nil && err != sql.ErrNoRows {
 		check(err)
@@ -122,11 +147,11 @@ func (db JiraDb) getUserStats(username string) (error, int) {
 func (db JiraDb) cleanTables() {
 	fmt.Println("cleaning tables..")
 
-	_, err := db.db.Exec("drop table tasks")
+	_, err := db.db.Exec("DROP TABLE tasks")
 	if err != nil {
 		fmt.Println(err)
 	}
-	_, err = db.db.Exec("drop table users")
+	_, err = db.db.Exec("DROP TABLE users")
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -136,10 +161,10 @@ func (db JiraDb) initTables() {
 	log.Print("initializing tables..")
 
 	_, err := db.db.Exec(`
-		create table users (
-			username varchar(50) primary key,
-			email varchar(100),
-			available_blocks integer default 0
+		CREATE TABLE users (
+			username VARCHAR(50) PRIMARY KEY,
+			email VARCHAR(100),
+			available_blocks INTEGER DEFAULT 0
 		);`)
 
 	if err != nil {
@@ -147,13 +172,13 @@ func (db JiraDb) initTables() {
 	}
 
 	_, err = db.db.Exec(`
-		create table tasks (
-			  id serial primary key,
-			  username varchar(50) references users(username),
-			  type varchar(50),
-			  key varchar(50),
-			  summary varchar(200),
-			  time timestamp
+		CREATE TABLE tasks (
+			  id SERIAL PRIMARY KEY,
+			  username VARCHAR(50) REFERENCES users(username),
+			  type VARCHAR(50),
+			  key VARCHAR(50),
+			  summary VARCHAR(200),
+			  time TIMESTAMP
 		);`)
 
 	if err != nil {
@@ -161,14 +186,14 @@ func (db JiraDb) initTables() {
 	}
 
 	_, err = db.db.Exec(`
-		create table blocks (
-			  username varchar(50) references users(username),
-			  material varchar(50),
-			  x int,
-			  y int,
-			  z int,
-			  primary key(x, y, z),
-			  time timestamp
+		CREATE TABLE blocks (
+			  username VARCHAR(50) REFERENCES users(username),
+			  material VARCHAR(50),
+			  x INT,
+			  y INT,
+			  z INT,
+			  PRIMARY KEY(x, y, z),
+			  time TIMESTAMP
 		);`)
 
 	if err != nil {
@@ -176,9 +201,9 @@ func (db JiraDb) initTables() {
 	}
 
 	_, err = db.db.Exec(`
-		create table sql_update (
-			current_version int primary key,
-            		update_time timestamp default now()
+		CREATE TABLE sql_update (
+			current_version INT PRIMARY KEY,
+            		update_time TIMESTAMP DEFAULT now()
 		);`)
 
 	if err != nil {
@@ -192,7 +217,7 @@ type Migrations struct {
 
 type MigrationEntry struct {
 	source  string `json:"source"`
-	version int `json:"version"`
+	version int    `json:"version"`
 }
 
 func (db JiraDb) migrate() {
@@ -200,7 +225,7 @@ func (db JiraDb) migrate() {
 
 	var migrations Migrations
 
-	file := readFile("./sql-update/migrations.json")
+	file := readFile("./sql-migrations/migrations.json")
 	err := json.Unmarshal(file.Bytes(), &migrations)
 
 	check(err)

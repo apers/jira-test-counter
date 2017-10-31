@@ -3,6 +3,10 @@
     {
       "source": "1.sql",
       "version": "1"
+    },
+    {
+      "source": "2.sql",
+      "version": "2"
     }
   ]
 }
