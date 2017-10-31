@@ -8,18 +8,18 @@ import (
 )
 
 type UserStatsCollection struct {
-	Users []*UserStats
-	Teams []*TeamStats
+	Users []*UserStats `json:"users"`
+	Teams []*TeamStats `json:"teams"`
 }
 
 type UserStats struct {
-	Username         string
-	Available_blocks int
+	Username         string `json:"username"`
+	Available_blocks int `json:"available_blocks"`
 }
 
 type TeamStats struct {
-	Teamname         string
-	Available_blocks int
+	Teamname         string `json:"teamname"`
+	Available_blocks int `json:"available_blocks"`
 }
 
 type AchievementStat struct {
