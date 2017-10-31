@@ -65,8 +65,8 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	rows := db.getAllTaskCount()
 	for rows.Next() {
 		userStats = &UserStats{}
-		rows.Scan(&userStats.username, &userStats.available_blocks)
-		statsColl.users = append(statsColl.users, userStats)
+		rows.Scan(&userStats.Username, &userStats.Available_blocks)
+		statsColl.Users = append(statsColl.Users, userStats)
 	}
 
 	fmt.Println("Tasks")
@@ -75,8 +75,8 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	// Read main team stats
 	rows = db.getMainTaskCount()
 	teamStats = &TeamStats{}
-	rows.Scan(&teamStats.teamname, &teamStats.available_blocks)
-	statsColl.teams = append(statsColl.teams, teamStats)
+	rows.Scan(&teamStats.Teamname, &teamStats.Available_blocks)
+	statsColl.Teams = append(statsColl.Teams, teamStats)
 
 	fmt.Println("Main")
 	fmt.Println(statsColl)
@@ -85,8 +85,8 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	// Read core stats
 	rows = db.getCoreTaskCount()
 	teamStats = &TeamStats{}
-	rows.Scan(&teamStats.teamname, &teamStats.available_blocks)
-	statsColl.teams = append(statsColl.teams, teamStats)
+	rows.Scan(&teamStats.Teamname, &teamStats.Available_blocks)
+	statsColl.Teams = append(statsColl.Teams, teamStats)
 
 	fmt.Println("Core")
 	fmt.Println(statsColl)
@@ -106,8 +106,8 @@ func achievementStatsHandler(w http.ResponseWriter, r *http.Request) {
 	rows := db.getAllTaskCount()
 	for rows.Next() {
 		userStats = &UserStats{}
-		rows.Scan(&userStats.username, &userStats.available_blocks)
-		statsColl.users = append(statsColl.users, userStats)
+		rows.Scan(&userStats.Username, &userStats.Available_blocks)
+		statsColl.Users = append(statsColl.Users, userStats)
 	}
 
 	js, err := json.Marshal(statsColl)
