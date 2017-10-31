@@ -41,7 +41,7 @@ func dbConnect() JiraDb {
 func (db JiraDb) addTask(username string, taskType string, key string, summary string) {
 	stmt, err := db.db.Prepare("INSERT INTO tasks(username, type, key, summary, time) VALUES($1, $2, $3, $4, $5)")
 	check(err)
-	_, err = stmt.Exec(username, taskType, key, time.Now(), summary)
+	_, err = stmt.Exec(username, taskType, key, summary, time.Now())
 	check(err)
 }
 
