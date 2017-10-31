@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"bytes"
+	"fmt"
 )
 
 type UserStatsCollection struct {
@@ -68,17 +69,27 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 		statsColl.users = append(statsColl.users, userStats)
 	}
 
+	fmt.Println("Tasks")
+	fmt.Println(statsColl)
+
 	// Read main team stats
 	rows = db.getMainTaskCount()
 	teamStats = &TeamStats{}
 	rows.Scan(&teamStats.teamname, &teamStats.available_blocks)
 	statsColl.teams = append(statsColl.teams, teamStats)
 
+	fmt.Println("Main")
+	fmt.Println(statsColl)
+
+
 	// Read core stats
 	rows = db.getCoreTaskCount()
 	teamStats = &TeamStats{}
 	rows.Scan(&teamStats.teamname, &teamStats.available_blocks)
 	statsColl.teams = append(statsColl.teams, teamStats)
+
+	fmt.Println("Core")
+	fmt.Println(statsColl)
 
 	js, err := json.Marshal(statsColl)
 	check(err)
