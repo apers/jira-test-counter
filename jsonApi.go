@@ -73,9 +73,9 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println(statsColl)
 
 	// Read main team stats
-	rows = db.getMainTaskCount()
+	row := db.getMainTaskCount()
 	teamStats = &TeamStats{}
-	rows.Scan(&teamStats.Teamname, &teamStats.Available_blocks)
+	row.Scan(&teamStats.Teamname, &teamStats.Available_blocks)
 	statsColl.Teams = append(statsColl.Teams, teamStats)
 
 	fmt.Println("Main")
@@ -83,9 +83,9 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 
 
 	// Read core stats
-	rows = db.getCoreTaskCount()
+	row = db.getCoreTaskCount()
 	teamStats = &TeamStats{}
-	rows.Scan(&teamStats.Teamname, &teamStats.Available_blocks)
+	row.Scan(&teamStats.Teamname, &teamStats.Available_blocks)
 	statsColl.Teams = append(statsColl.Teams, teamStats)
 
 	fmt.Println("Core")

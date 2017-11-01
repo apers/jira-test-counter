@@ -72,30 +72,18 @@ func (db JiraDb) getAllTaskCount() *sql.Rows {
 	return res
 }
 
-func (db JiraDb) getMainTaskCount() *sql.Rows {
-	stmt, err := db.db.Prepare(`
+func (db JiraDb) getMainTaskCount() *sql.Row {
+	return db.db.QueryRow(`
 		SELECT 'MAIN', COUNT(*)
 		FROM tasks
-		WHERE username IN ('ajo', 'rbr', 'vd', 'kah', 'hvg');`)
-
-	defer stmt.Close()
-	check(err)
-	res, err := stmt.Query()
-	check(err)
-	return res
+		WHERE username IN ('ajo', 'rbr', 'vd', 'kah', 'hvg')`)
 }
 
-func (db JiraDb) getCoreTaskCount() *sql.Rows {
-	stmt, err := db.db.Prepare(`
+func (db JiraDb) getCoreTaskCount() *sql.Row {
+	return db.db.QueryRow(`
 		SELECT 'CORE', COUNT(*)
 		FROM tasks
-		WHERE username IN ('rmg', 'ap', 'wab', 'jbe', 'tkg');`)
-
-	defer stmt.Close()
-	check(err)
-	res, err := stmt.Query()
-	check(err)
-	return res
+		WHERE username IN ('rmg', 'ap', 'wab', 'jbe', 'tkg')`)
 }
 
 /* user*/
