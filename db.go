@@ -74,14 +74,14 @@ func (db JiraDb) getAllTaskCount() *sql.Rows {
 
 func (db JiraDb) getMainTaskCount() *sql.Row {
 	return db.db.QueryRow(`
-  	  SELECT SUM(available_blocks)
+  	  SELECT 'MAIN', SUM(available_blocks)
 	  FROM users
 	  WHERE username IN ('ajo', 'rbr', 'vd', 'kah', 'hvg');`)
 }
 
 func (db JiraDb) getCoreTaskCount() *sql.Row {
 	return db.db.QueryRow(`
-  	  SELECT SUM(available_blocks)
+  	  SELECT 'CORE', SUM(available_blocks)
 	  FROM users
 	  WHERE username IN ('rmg', 'ap', 'wab', 'jbe', 'tkg')`)
 }
