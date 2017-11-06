@@ -14,12 +14,12 @@ type UserStatsCollection struct {
 
 type UserStats struct {
 	Username         string `json:"username"`
-	Available_blocks int `json:"available_blocks"`
+	Available_blocks int    `json:"available_blocks"`
 }
 
 type TeamStats struct {
 	Teamname         string `json:"teamname"`
-	Available_blocks int `json:"available_blocks"`
+	Available_blocks int    `json:"available_blocks"`
 }
 
 type AchievementStat struct {
@@ -56,7 +56,6 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	// Todo - move to own handler and endpoint
 
-
 	var statsColl UserStatsCollection
 	var userStats *UserStats
 	var teamStats *TeamStats
@@ -81,7 +80,6 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Main")
 	fmt.Println(statsColl)
 
-
 	// Read core stats
 	row = db.getCoreTaskCount()
 	teamStats = &TeamStats{}
@@ -97,6 +95,36 @@ func statsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Write(js)
+}
+
+func blocksHandler(w http.ResponseWriter, r *http.Request) {
+	// Todo - move to own handler and endpoint
+	// Post request coming from mineraft server
+	if r.Method == "POST" {
+		buf := readReader(r.Body)
+		if buf.Len() == 0 {
+			return
+		}
+
+		var blockUpdate BlockDataUpdate
+		err := json.Unmarshal(buf.Bytes(), &blockUpdate)
+		check(err)
+
+		db.insertBlockUpdate(blockUpdate)
+	}
+
+	if r.Method == "GET" {
+		buf := readReader(r.Body)
+		if buf.Len() == 0 {
+			return
+		}
+
+		var blockUpdate BlockDataUpdate
+		err := json.Unmarshal(buf.Bytes(), &blockUpdate)
+		check(err)
+
+		db.insertBlockUpdate(blockUpdate)
+	}
 }
 
 func achievementStatsHandler(w http.ResponseWriter, r *http.Request) {

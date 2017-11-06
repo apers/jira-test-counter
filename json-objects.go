@@ -1,5 +1,13 @@
 package main
 
+type BlockDataUpdate struct  {
+	X int64 `json:"x"`
+	Y int64 `json:"y"`
+	Z int64 `json:"z"`
+	Username string `json:"username"`
+	Material string `json:"material"`
+}
+
 type MinecraftEvent struct {
 	Username string `json:"username"`
 	AvailableBlocks int `json:"availableBlocks"`

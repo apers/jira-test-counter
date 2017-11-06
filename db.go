@@ -119,6 +119,15 @@ func (db JiraDb) updateAvailableBlocks(username string, availableBlocks int) {
 	check(err)
 }
 
+func (db JiraDb) insertBlockUpdate(blockUpdate BlockDataUpdate) {
+	fmt.Println("BlockDataUpdate: ", blockUpdate)
+	stmt, err := db.db.Prepare("INSERT INTO blocks(username, material, x, y, z, time) VALUES ($1, $2, $3, $4, $5, $6)")
+	defer stmt.Close()
+	check(err)
+	_, err = stmt.Exec(blockUpdate.Username, blockUpdate.Material, blockUpdate.X, blockUpdate.Y, blockUpdate.Z, time.Now())
+	check(err)
+}
+
 func (db JiraDb) getUserStats(username string) (error, int) {
 	var taskcount int
 	err := db.db.QueryRow("SELECT count(*) FROM tasks WHERE username=$1", username).Scan(&taskcount)
