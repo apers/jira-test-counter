@@ -17,6 +17,7 @@ const TaskTypeReview = "review"
 const TaskTypeTest = "test"
 
 func webHookHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Webhook blob recieved", time.Now())
 	buf := readReader(r.Body)
 
 	if buf.Len() == 0 {
